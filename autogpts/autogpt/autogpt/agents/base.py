@@ -221,11 +221,6 @@ class BaseAgent(Configurable[BaseAgentSettings], metaclass=AgentABCMeta):
                 return component
         return None
 
-    def is_enabled(self, component: AgentComponent) -> bool:
-        if callable(component.enabled):
-            return component.enabled()
-        return component.enabled
-
     async def foreach_components(
         self, method_name: str, *args, retry_limit: int = 3
     ) -> Any:
@@ -243,7 +238,7 @@ class BaseAgent(Configurable[BaseAgentSettings], metaclass=AgentABCMeta):
                     method = getattr(component, method_name, None)
                     if not callable(method):
                         continue
-                    if not self.is_enabled(component):
+                    if not component.enabled:
                         self._trace.append(
                             f"   {Fore.LIGHTBLACK_EX}"
                             f"{component.__class__.__name__}{Fore.RESET}"
