@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from forge.json import json_loads
+from forge.json import extract_dict_from_json, json_loads
 
 _JSON_FIXABLE: list[tuple[str, str]] = [
     # Missing comma
@@ -90,3 +90,27 @@ def test_json_loads_fixable(fixable_json: tuple[str, str]):
 
 def test_json_loads_unfixable(unfixable_json: tuple[str, str]):
     assert json_loads(unfixable_json[0]) != json.loads(unfixable_json[1])
+
+
+def test_extract_json_from_response(valid_json_response: dict):
+    emulated_response_from_openai = json.dumps(valid_json_response)
+    assert extract_dict_from_json(emulated_response_from_openai) == valid_json_response
+
+
+def test_extract_json_from_response_wrapped_in_code_block(valid_json_response: dict):
+    emulated_response_from_openai = "```" + json.dumps(valid_json_response) + "```"
+    assert extract_dict_from_json(emulated_response_from_openai) == valid_json_response
+
+
+def test_extract_json_from_response_wrapped_in_code_block_with_language(
+    valid_json_response: dict,
+):
+    emulated_response_from_openai = "```json" + json.dumps(valid_json_response) + "```"
+    assert extract_dict_from_json(emulated_response_from_openai) == valid_json_response
+
+
+def test_extract_json_from_response_json_contained_in_string(valid_json_response: dict):
+    emulated_response_from_openai = (
+        "sentence1" + json.dumps(valid_json_response) + "sentence2"
+    )
+    assert extract_dict_from_json(emulated_response_from_openai) == valid_json_response

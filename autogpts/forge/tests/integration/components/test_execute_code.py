@@ -4,20 +4,25 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from forge.agent.base import BaseAgentSettings
 from forge.components.code_executor import (
     ALLOWLIST_CONTROL,
     CodeExecutorComponent,
     is_docker_available,
     we_are_running_in_a_docker_container,
 )
+from forge.config import Config
+from forge.file_storage import FileStorage
 from forge.utils.exceptions import InvalidArgumentError, OperationNotAllowedError
-
-from autogpt.agents.agent import Agent
 
 
 @pytest.fixture
-def code_executor_component(agent: Agent):
-    return agent.code_executor
+def code_executor_component(
+    workspace: FileStorage, agent_state: BaseAgentSettings, app_config: Config
+):
+    return CodeExecutorComponent(
+        workspace=workspace, state=agent_state, config=app_config
+    )
 
 
 @pytest.fixture
